@@ -11,21 +11,18 @@ function sanitizeRecorridoInput (req: Request, res: Response, next: NextFunction
     totalKm: req.body.totalKm
   }
 
-  Object.keys(req.body.sanitizedInput).forEach((key) => {
-    if (req.body.sanitizedInput[key] === undefined) {
-      req.body.sanitizedInput[key] = undefined
-    }
-  })
-
+  req.body.sanitizedInput = Object.fromEntries(
+    Object.entries(req.body.sanitizedInput).filter(([_, value]) => value !== undefined)
+  )
   next()
 }
 
 async function findAll (req: Request, res: Response): Promise<void> {
   try {
     const recorridos = await em.find(Recorrido, {})
-    res.status(200).json({ message: 'Recorridos encontrados', data: recorridos })
+    res.status(200).json({ message: 'Listado de los recorridos: ', data: recorridos })
   } catch (error: any) {
-    res.status(500).json({ message: error.message })
+    res.status(500).json({ message: 'Error al obtener el listado de los recorridos', error: error.message })
   }
 }
 
@@ -33,9 +30,9 @@ async function findOne (req: Request, res: Response): Promise<void> {
   try {
     const id = Number.parseInt(req.params.id)
     const recorrido = await em.findOneOrFail(Recorrido, { id })
-    res.status(200).json({ message: 'Recorrido encontrado', data: recorrido })
+    res.status(200).json({ message: 'El "Recorrido" ha sido encontrado: ', data: recorrido })
   } catch (error: any) {
-    res.status(500).json({ message: error.message })
+    res.status(500).json({ message: 'Error al obtener el recorrido', error: error.message })
   }
 }
 
@@ -43,9 +40,9 @@ async function add (req: Request, res: Response): Promise<void> {
   try {
     const recorrido = em.create(Recorrido, req.body.sanitizedInput)
     await em.flush()
-    res.status(200).json({ message: 'Recorrido creado', data: recorrido })
+    res.status(200).json({ message: 'El "Recorrido" ha sido cargado con exito: ', data: recorrido })
   } catch (error: any) {
-    res.status(500).json({ message: error.message })
+    res.status(500).json({ message: 'Error al agregar el "recorrido"', error: error.message })
   }
 }
 
@@ -54,8 +51,8 @@ async function update (req: Request, res: Response): Promise<void> {
     const id = Number.parseInt(req.params.id)
     const recorrido = await em.findOneOrFail(Recorrido, { id })
     em.assign(recorrido, req.body.sanitizedInput)
-    await em.flush
-    res.status(200).json({ message: 'Recorrido actualizado', data: recorrido })
+    await em.flush()
+    res.status(200).json({ message: 'El "Recorrido" ha sido actualizado con exito: ', data: recorrido })
   } catch (error: any) {
     res.status(500).json({ message: error.message })
   }
@@ -64,11 +61,11 @@ async function update (req: Request, res: Response): Promise<void> {
 async function remove (req: Request, res: Response): Promise<void> {
   try {
     const id = Number.parseInt(req.params.id)
-    const recorrido = em.getReference(Recorrido, id)
+    const recorrido = await em.findOneOrFail(Recorrido, { id })
     await em.removeAndFlush(recorrido)
-    res.status(200).json({ message: 'Recorrido con id ' + req.params.id + ' eliminado con exito' })
+    res.status(200).json({ message: 'El "Recorrido" ha sido eliminado con exito: ', data: recorrido })
   } catch (error: any) {
-    res.status(500).json({ message: error.message })
+    res.status(500).json({ message: 'Error al eliminar el "Recorrido"', error: error.message })
   }
 }
 

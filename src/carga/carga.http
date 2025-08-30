@@ -1,0 +1,32 @@
+### GET ALL
+GET http://localhost:3000/api/carga/
+
+### POST
+# @name cargaCreated
+POST http://localhost:3000/api/carga/
+Content-Type: application/json
+
+{
+    "name": "Carbon",
+    "tara": 100,
+    "idTipoCarga": 1
+
+}
+
+### ID
+@id = {{cargaCreated.response.body.data.id}}
+
+### FIND ONE
+GET http://localhost:3000/api/carga/{{id}}
+
+### PUT
+PUT http://localhost:3000/api/carga/{{id}}
+Content-Type: application/json
+
+{
+    "name": "asdasd"
+}
+
+### DELETE
+@idToDelete = {{cargaCreated.response.body.data.id}}
+DELETE http://localhost:3000/api/carga/{{id}}
